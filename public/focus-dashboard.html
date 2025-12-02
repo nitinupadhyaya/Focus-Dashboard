@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Focus Dashboard</title>
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      background: #f8fafc;
+      color: #111827;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      color: #2563eb;
+      margin-bottom: 1.5rem;
+    }
+    #activities {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 700px;
+      margin: auto;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    .title {
+      font-weight: 600;
+    }
+    .url {
+      font-size: 0.9em;
+      color: #4b5563;
+      word-break: break-all;
+    }
+    .analysis {
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      border-left: 4px solid #3b82f6;
+      background: #eff6ff;
+    }
+    .time {
+      font-size: 0.85em;
+      color: #6b7280;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧠 Focus Dashboard</h1>
+  <div id="activities">Loading activities...</div>
+
+  <script>
+    async function loadActivities() {
+      const baseUrl =
+        window.location.hostname === "localhost"
+          ? "http://localhost:3000"
+          : "https://therelationshipslab.vercel.app"; // ✅ auto-detect environment
+
+      try {
+        const res = await fetch(`${baseUrl}/api/summary`);
+        const activities = await res.json();
+        const container = document.getElementById("activities");
+
+        if (!activities.length) {
+          container.innerHTML = "<p>No recent activities recorded yet.</p>";
+          return;
+        }
+
+        container.innerHTML = activities
+          .reverse()
+          .map(
+            (a) => `
+          <div class="card">
+            <div class="title">${a.title}</div>
+            <div class="url"><a href="${a.url}" target="_blank">${a.url}</a></div>
+            <div class="analysis">${a.analysis}</div>
+            <div class="time">🕒 ${a.time}</div>
+          </div>`
+          )
+          .join("");
+      } catch (err) {
+        document.getElementById("activities").innerHTML =
+          "<p>⚠️ Could not load activities. Please try again later.</p>";
+        console.error("Error loading dashboard:", err);
+      }
+    }
+
+    loadActivities();
+    setInterval(loadActivities, 10000); // auto-refresh every 10 seconds
+  </script>
+</body>
+</html>
+
